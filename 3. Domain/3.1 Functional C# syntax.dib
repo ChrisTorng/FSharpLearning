@@ -1,0 +1,75 @@
+#!markdown
+
+# Functional C# syntax
+
+[C#'s Functional Journey](https://www.infoq.com/presentations/c-sharp-functional-features/)
+
+## [Lambda](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions)
+
+#!csharp
+
+Func<int, int> square = x => x * x;
+return square(5);
+
+#!markdown
+
+# [LINQ](https://docs.microsoft.com/en-us/dotnet/csharp/linq/)
+
+#!csharp
+
+int[] numbers = { 2, 3, 4, 5 };
+var squaredNumbers = numbers.Select(x => x * x);
+return squaredNumbers;
+
+#!markdown
+
+## [Patten matching](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns)
+
+#!csharp
+
+static string TakeFive(object input) => input switch
+{
+    string { Length: >= 5 } s => s.Substring(0, 5),
+    string s => s,
+
+    ICollection<char> { Count: >= 5 } symbols => new string(symbols.Take(5).ToArray()),
+    ICollection<char> symbols => new string(symbols.ToArray()),
+
+    null => throw new ArgumentNullException(nameof(input)),
+    _ => throw new ArgumentException("Not supported input type.", nameof(input)),
+};
+
+WriteLine(TakeFive("Hello, world!"));
+WriteLine(TakeFive("Hi!"));
+WriteLine(TakeFive(new[] { '1', '2', '3', '4', '5', '6', '7' }));
+WriteLine(TakeFive(new[] { 'a', 'b', 'c' }));
+WriteLine(TakeFive(null));
+WriteLine(TakeFive(1));
+
+#!markdown
+
+## [Records](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+
+* Value equality
+* Immutability
+* Nondestructive mutation
+
+#!csharp
+
+record Person(string FirstName, string LastName);
+
+var person1 = new Person("Chris", "Torng");
+var person2 = new Person("Chris", "Torng");
+
+// Nondestructive mutation
+var person3 = person2 with { FirstName = "Alex" };
+
+// Built-in formatting
+WriteLine(person1);
+
+// Immutability
+//person2.FirstName = "Alex";
+
+// Value equality
+WriteLine(person1 == person2);
+WriteLine(person1 == person3);
