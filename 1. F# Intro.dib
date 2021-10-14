@@ -1,0 +1,46 @@
+#!markdown
+
+# 1. F# Intro
+
+## Succinct
+
+#!csharp
+
+public static int Square(int x)
+{
+    return x * x;
+}
+
+public static int SumOfSquares(int n)
+{
+    int sum = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        sum += Square(i);
+    }
+    return sum;
+}
+
+return SumOfSquares(100);
+
+#!fsharp
+
+let square x = x + x
+
+let sumOfSquares n =
+   [1..n]
+   |> List.map square
+   |> List.sum
+
+sumOfSquares 100
+
+#!csharp
+
+int Square(int x) =>  x * x;
+
+int SumOfSquares(int n)
+   => Enumerable.Range(1, n)
+      .Select(i => Square(i))
+      .Sum();
+
+return SumOfSquares(100);
