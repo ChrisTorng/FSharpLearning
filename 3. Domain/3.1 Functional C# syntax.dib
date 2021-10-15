@@ -27,17 +27,20 @@ return squaredNumbers;
 
 #!csharp
 
-class ImmutableSample
+readonly struct Immutable
 {
     public readonly int readonlyValue;
 
     public int InitValue { get; init; }
 
-    public ImmutableSample(int newReadonly) =>
+    public Immutable(int newReadonly)
+    {
         readonlyValue = newReadonly;
+        InitValue = 0;
+    }
 }
 
-var immutable = new ImmutableSample(1) { InitValue = 1 };
+var immutable = new Immutable(1) { InitValue = 1 };
 //immutable.readonlyValue = 2;
 //immutable.InitValue = 2;
 
@@ -72,16 +75,23 @@ WriteLine(TakeFive(1));
 
 ## [Records](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 
-* Value equality
+* Easy declaration
 * Immutability
 * Nondestructive mutation
+* Value equality
 
 #!csharp
 
+using static System.Console;
+
+// Easy declaration
 record Person(string FirstName, string LastName);
 
 var person1 = new Person("Chris", "Torng");
 var person2 = new Person("Chris", "Torng");
+
+// Immutability
+//person2.FirstName = "Alex";
 
 // Nondestructive mutation
 var person3 = person2 with { FirstName = "Alex" };
@@ -89,9 +99,15 @@ var person3 = person2 with { FirstName = "Alex" };
 // Built-in formatting
 WriteLine(person1);
 
-// Immutability
-//person2.FirstName = "Alex";
-
 // Value equality
 WriteLine(person1 == person2);
 WriteLine(person1 == person3);
+
+#!markdown
+
+Not adopting `record` now
+
+* No inheritance between `class`
+* Less code only
+
+Waiting for `readonly record struct`

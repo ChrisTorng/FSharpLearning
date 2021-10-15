@@ -1,0 +1,10 @@
+#!csharp
+
+#r "nuget:Meziantou.Framework.StronglyTypedId"
+
+#!csharp
+
+using Meziantou.Framework.StronglyTypedId;
+
+//[StronglyTypedId(typeof(int))]
+//public partial struct ProjectId { }
