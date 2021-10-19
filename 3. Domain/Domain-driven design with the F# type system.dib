@@ -1,0 +1,426 @@
+#!markdown
+
+# [Domain-driven design with the F# type system](https://fsharpforfunandprofit.com/ddd/)
+
+#!fsharp
+
+let three = 1 + 2
+let square x = x * x
+printfn "Three is %i" three
+printfn "Three squared is %i" (square three)
+
+#!markdown
+
+## Value type
+
+#!fsharp
+
+type Contact = {
+    FirstName: string
+    MiddleInitial: string
+    LastName: string
+
+    EmailAddress: string
+    IsEmailVerified: bool  // true if ownership of email address is confirmed
+}
+
+#!markdown
+
+The issues with this design are:
+* Which values are optional?
+* Whare the constraints?
+* What groups of properties are linked?
+* Is there any domain logic that we need to be aware of?
+
+#!fsharp
+
+type PersonalName = {FirstName:string; LastName:string}
+
+let alice = {FirstName="Alice"; LastName="Adams"}
+let aliceClone = {FirstName="Alice"; LastName="Adams"}
+printfn "Alice's name is %A" alice
+printfn "AliceClone's name is %A" aliceClone
+printfn "Are Alice and clone equal? %b" (alice = aliceClone)
+
+#!markdown
+
+## Entity type
+
+#!fsharp
+
+[<CustomEquality; NoComparison>]    
+type Person = {Id:int; Name:PersonalName} with
+    override this.Equals(other) =
+        match other with
+        | :? Person as p -> (this.Id = p.Id)
+        | _ -> false
+    override this.GetHashCode() = hash this.Id
+
+let alice = {Id=1; Name={FirstName="Alice"; LastName="Adams"}}
+let bilbo = {Id=1; Name={FirstName="Bilbo"; LastName="Baggins"}}
+printfn "Alice is %A" alice
+printfn "Bilbo is %A" bilbo
+printfn "Are Alice and Bilbo equal? %b" (alice = bilbo)
+printfn "Are Alice.Name and Bilbo.Name equal? %b" (alice.Name = bilbo.Name)
+
+#!markdown
+
+## Entity versioning in F#
+
+#!fsharp
+
+[<NoEquality; NoComparison>]    
+type Person = {Id:int; Version:Guid; Name:PersonalName}
+
+let alice ={Id=1; Version=Guid.NewGuid();
+            Name={FirstName="Alice"; LastName="Adams"}}
+            
+let aliceV2 = {alice with
+                Version=Guid.NewGuid(); 
+                Name={FirstName="Al"; LastName="Adamson"}}
+
+printfn "Alice is %A" alice
+printfn "AliceV2 is %A" aliceV2
+//printfn "Are Alice and AliceV2 equal? %b" (alice = aliceV2) // uncomment this to get a compiler error
+printfn "Are Alice and AliceV2 same id? %b" (alice.Id = aliceV2.Id)
+printfn "Are Alice and AliceV2 same version? %b" (alice.Version = aliceV2.Version)
+
+#!markdown
+
+## Entity object definition with mutability
+
+#!fsharp
+
+[<NoEquality; NoComparison>]    
+    type Person = {Id:int; mutable Name:PersonalName} 
+
+let alice ={Id=1; Name={FirstName="Alice"; LastName="Adams"}}
+printfn "Alice before change  is %A" alice
+            
+alice.Name <- {FirstName="Al"; LastName="Adamson"}
+printfn "Alice after change  is %A" alice
+
+#!fsharp
+
+// a Value Object
+[<StructuralEquality;NoComparison>]
+type PersonalName = {
+    FirstName : string;
+    LastName : string }
+
+// an Entity
+[<NoEquality; NoComparison>]       
+type Person = {
+    Id : int;
+    Name : PersonalName }
+
+// try to put an Entity inside a Value
+//[<StructuralEquality;NoComparison>]      // uncomment to get a compiler error
+//type PersonWrapper = { Person: Person }  // uncomment to get a compiler error
+
+#!markdown
+
+## Ubiquitous language
+
+#!fsharp
+
+type Suit = Club | Diamond | Spade | Heart
+            // | means a choice -- pick one from the list
+            
+type Rank = Two | Three | Four | Five | Six | Seven | Eight 
+            | Nine | Ten | Jack | Queen | King | Ace
+
+type Card = Suit * Rank   // * means a pair -- one from each type
+
+type Hand = Card list
+type Deck = Card list
+
+type Player = {Name:string; Hand:Hand}
+type Game = {Deck:Deck; Players: Player list}
+
+type Deal = Deck -> (Deck * Card) // X -> Y means a function
+                                  // input of type X
+                                  // output of type Y
+
+type PickupCard = (Hand * Card)-> Hand
+
+#!fsharp
+
+let aceHearts  = (Heart, Ace)
+let aceSpades = (Spade, Ace)
+let twoClubs = (Club, Two)
+
+let myHand = [aceHearts; aceSpades; twoClubs]
+
+let deck = [aceHearts; aceSpades; twoClubs]
+
+let deal cards = 
+    let head::tail = cards   // compiler has found a potential bug here!
+    (tail, head)
+
+#!markdown
+
+## F# type system
+
+#!fsharp
+
+let x = (1,2)    //  int * int
+let y = (true,false)    //  bool * bool 
+
+type Person = Person of string // dummy type    
+type Date = Date of string // dummy type    
+
+type Birthday = Person * Date
+let alice = Person "Alice"
+let date1 = Date "Jan 12th"
+let aliceBDay = (alice,date1)
+let aliceBDay2 : Birthday = (alice,date1)  // with explicit typing
+
+#!fsharp
+
+type Temp = 
+    | F of int
+    | C of float
+
+type CardType = CardType of string
+type CardNumber = CardNumber of string
+
+type PaymentMethod = 
+    | Cash
+    | Cheque of int
+    | Card of CardType * CardNumber
+
+#!fsharp
+
+let isFever temp = 
+    match temp with
+    | F tempInF -> tempInF > 101
+    | C tempInC -> tempInC > 38.0
+
+let temp1 = F 103 
+printfn "temp %A is fever? %b" temp1 (isFever temp1)
+
+let temp2 = C 37.0
+printfn "temp %A is fever? %b" temp2 (isFever temp2)
+
+let printPayment paymentMethod = 
+    match paymentMethod with
+    | Cash -> 
+        printfn "Paid in cash"
+    | Cheque checkNo ->
+        printfn "Paid by cheque: %i" checkNo
+    | Card (cardType,cardNo) ->
+        printfn "Paid with %A %A" cardType cardNo
+
+let cashPayment = Cash
+let chequePayment  = Cheque 123
+let cardPayment  = Card (CardType "Visa",CardNumber "123")
+
+printPayment cashPayment
+printPayment chequePayment
+printPayment cardPayment
+
+#!markdown
+
+## Designing with types
+
+#!fsharp
+
+type OptionalString = 
+    | SomeString of string
+    | Nothing
+
+type OptionalInt = 
+    | SomeInt of string
+    | Nothing
+
+type OptionalBool = 
+    | SomeBool of string
+    | Nothing
+
+// built in!
+//    type Option<'T> = 
+//        | Some of 'T
+//        | None
+
+#!fsharp
+
+type PersonalName1 = 
+    {
+    FirstName: string
+    MiddleInitial: Option<string>
+    LastName: string
+    }
+
+type PersonalName2 = 
+    {
+    FirstName: string
+    MiddleInitial: string option
+    LastName: string
+    }
+
+#!fsharp
+
+type EmailAddress = EmailAddress of string
+type PhoneNumber = PhoneNumber of string
+
+type CustomerId = CustomerId of int
+type OrderId = OrderId of int
+
+#!fsharp
+
+let email1 = EmailAddress "abc"
+let email2 = EmailAddress "def"
+let phone1 = PhoneNumber "abc"
+
+printfn "%A = %A? %b" email1 email2 (email1=email2)
+//printfn "%A = %A? %b" email1 phone1 (email1=phone1)   // uncommento get compiler error
+
+#!fsharp
+
+open System.Text.RegularExpressions
+type EmailAddress = EmailAddress of string
+
+// createEmailAddress : string -> EmailAddress option
+let createEmailAddress (s:string) = 
+    if Regex.IsMatch(s,@"^\S+@\S+\.\S+$") 
+        then Some (EmailAddress s)
+        else None
+
+let email1 = createEmailAddress "a@example.com"
+let email2 = createEmailAddress "example.com"
+printfn "%A" email1
+printfn "%A" email2
+
+#!fsharp
+
+type String50 = String50 of string
+
+let createString50 (s:string) = 
+    if s = null
+        then None
+    else if s.Length <= 50
+        then Some (String50 s)
+        else None
+
+let s1 = createString50 "12345"
+let s2 = createString50 (String.replicate 100 "a")
+
+#!fsharp
+
+type OrderLineQty = OrderLineQty of int
+
+let createOrderLineQty qty = 
+    if qty >0 && qty <= 99
+        then Some (OrderLineQty qty)
+        else None
+
+let increment (OrderLineQty i) =
+    createOrderLineQty (i + 1)
+
+let decrement (OrderLineQty i) =
+    createOrderLineQty (i - 1)
+
+let qty1 = createOrderLineQty 1
+let qty2 = createOrderLineQty 0
+
+let qty3 = 
+    match qty1 with
+    | Some i -> decrement i
+    | None -> None
+
+#!markdown
+
+## Prologue revisited
+
+#!fsharp
+
+type String1 = String1 of string
+type String50 = String50 of string
+type EmailAddress = EmailAddress of string
+
+type PersonalName = {
+    FirstName: String50
+    MiddleInitial: String1 option
+    LastName: String50 }
+
+type EmailContactInfo = {
+    EmailAddress: EmailAddress
+    IsEmailVerified: bool }
+
+type Contact = {
+    Name: PersonalName 
+    Email: EmailContactInfo }
+
+#!markdown
+
+## Verified email
+
+Rules:
+1. If the email is changed, the verified flag must be reset to false
+2. The verified flag can only be set by a special verification service
+
+#!fsharp
+
+type VerifiedEmail = VerifiedEmail of EmailAddress
+type VerificationHash = VerificationHash of string
+type VerificationService = 
+    (EmailAddress * VerificationHash) ->  VerifiedEmail option
+
+type EmailContactInfo = 
+    | Unverified of EmailAddress
+    | Verified of VerifiedEmail
+
+type Contact = {
+    Name: PersonalName 
+    Email: EmailContactInfo }
+
+#!markdown
+
+## A contact must have an email or a postal address
+
+#!fsharp
+
+type EmailContactInfo = 
+    | Unverified of EmailAddress
+    | Verified of VerifiedEmail
+
+type PostalContactInfo = {
+    Address1: String50
+    Address2: String50 option
+    Town: String50
+    PostCode: String50 }
+
+type Contact = {
+    Name: PersonalName 
+    Email: EmailContactInfo 
+    Address: PostalContactInfo 
+    }
+
+#!fsharp
+
+type ContactInfo = 
+    | EmailOnly of EmailContactInfo
+    | AddrOnly of PostalContactInfo
+    | EmailAndAddr of EmailContactInfo * PostalContactInfo
+
+type Contact = {
+    Name: PersonalName 
+    ContactInfo: ContactInfo 
+    }
+
+#!markdown
+
+## A contact must have at least one way of being contacted
+
+#!fsharp
+
+type ContactInfo = 
+    | EmailOnly of EmailContactInfo
+    | AddrOnly of PostalContactInfo
+
+type Contact = {
+    Name: PersonalName 
+    PrimaryContactInfo: ContactInfo
+    SecondaryContactInfo: ContactInfo option
+    }

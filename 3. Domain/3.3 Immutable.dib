@@ -1,0 +1,45 @@
+#!markdown
+
+# [Functional C#: Immutability](https://enterprisecraftsmanship.com/posts/functional-c-immutability/)
+
+#!csharp
+
+using static System.Console;
+public class ProductPile
+{
+    public string ProductName { get; }
+    public int Amount { get; }
+    public ProductPile(string productName, int amount)
+    {
+        ProductName = productName ??
+            throw new ArgumentNullException(nameof(productName));
+        if (amount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(amount));
+        }
+        Amount = amount;
+    }
+    public ProductPile Sold(int soldAmount)
+    {
+        int newAmount = Amount - soldAmount;
+        if (newAmount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(soldAmount));
+        }
+        return new ProductPile(ProductName, newAmount);
+    }
+}
+
+#!csharp
+
+#r "nuget:FluentAssertions"
+using static FluentAssertions.FluentActions;
+
+var threeProduct = new ProductPile("product", 3);
+var soldOneProduct = threeProduct.Sold(1);
+soldOneProduct.Amount.Should().Be(2);
+
+Invoking(() => new ProductPile(null, 1))
+    .Should().Throw<ArgumentNullException>();
+Invoking(() => new ProductPile("product", -1))
+.Should().Throw<ArgumentOutOfRangeException>();
