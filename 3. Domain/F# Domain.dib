@@ -1,0 +1,169 @@
+#!markdown
+
+# F# Domain
+
+[Domain Modeling Made Functional with the F# Type System](https://fsharpforfunandprofit.com/ddd/)
+
+#!fsharp
+
+type Contact = {
+    FirstName: string
+    MiddleInitial: string
+    LastName: string
+
+    EmailAddress: string
+    IsEmailVerified: bool
+}
+
+#!markdown
+
+The issues with this design are:
+* Which values are optional?
+* Whare the constraints?
+* What groups of properties are linked?
+* Is there any domain logic that we need to be aware of?
+
+#!fsharp
+
+type OptionalString = 
+    | SomeString of string
+    | Nothing
+
+type OptionalInt = 
+    | SomeInt of string
+    | Nothing
+
+type OptionalBool = 
+    | SomeBool of string
+    | Nothing
+
+// built in!
+//    type Option<'T> = 
+//        | Some of 'T
+//        | None
+
+type PersonalName1 = 
+    {
+    FirstName: string
+    MiddleInitial: Option<string>
+    LastName: string
+    }
+
+type PersonalName2 = 
+    {
+    FirstName: string
+    MiddleInitial: string option
+    LastName: string
+    }
+
+#!fsharp
+
+type String50 = String50 of string
+
+let createString50 (s:string) = 
+    if s = null
+        then None
+    else if s.Length <= 50
+        then Some (String50 s)
+        else None
+
+let s1 = createString50 "12345"
+let s2 = createString50 (String.replicate 100 "a")
+let s3 = createString50 null
+(s1, s2, s3)
+
+#!fsharp
+
+open System.Text.RegularExpressions 
+
+type EmailAddress = EmailAddress of string
+
+// createEmailAddress : string -> EmailAddress option
+let createEmailAddress (s:string) = 
+    if Regex.IsMatch(s,@"^\S+@\S+\.\S+$") 
+        then Some (EmailAddress s)
+        else None
+
+#!fsharp
+
+type String1 = String1 of string
+type String50 = String50 of string
+type EmailAddress = EmailAddress of string
+
+type PersonalName = {
+    FirstName: String50
+    MiddleInitial: String1 option
+    LastName: String50 }
+
+type EmailContactInfo = {
+    EmailAddress: EmailAddress
+    IsEmailVerified: bool }
+
+type Contact = {
+    Name: PersonalName 
+    Email: EmailContactInfo }
+
+#!markdown
+
+## Verified email
+
+Rules:
+1. If the email is changed, the verified flag must be reset to false
+2. The verified flag can only be set by a special verification service
+
+#!fsharp
+
+type VerifiedEmail = VerifiedEmail of EmailAddress
+type VerificationHash = VerificationHash of string
+type VerificationService = 
+    (EmailAddress * VerificationHash) ->  VerifiedEmail option
+
+type EmailContactInfo = 
+    | Unverified of EmailAddress
+    | Verified of VerifiedEmail
+
+#!markdown
+
+## A contact must have an email or a postal address
+
+#!fsharp
+
+type PostalContactInfo = {
+    Address1: String50
+    Address2: String50 option
+    Town: String50
+    PostCode: String50 }
+
+type Contact = {
+    Name: PersonalName 
+    Email: EmailContactInfo 
+    Address: PostalContactInfo 
+    }
+
+#!fsharp
+
+type ContactInfo = 
+    | EmailOnly of EmailContactInfo
+    | AddrOnly of PostalContactInfo
+    | EmailAndAddr of EmailContactInfo * PostalContactInfo
+
+type Contact = {
+    Name: PersonalName 
+    ContactInfo: ContactInfo 
+    }
+
+#!markdown
+
+## A contact must have at least one way of being contacted
+
+#!fsharp
+
+type ContactInfo = 
+    | EmailOnly of EmailContactInfo
+    | AddrOnly of PostalContactInfo
+
+type Contact = {
+    Name: PersonalName 
+    PrimaryContactInfo: ContactInfo
+    SecondaryContactInfo: ContactInfo option
+    }

@@ -1,0 +1,7 @@
+#!markdown
+
+# [Non-nullable reference types](https://enterprisecraftsmanship.com/posts/functional-c-non-nullable-reference-types/)
+
+[NullGuard.Fody](https://github.com/Fody/NullGuard)
+
+`[assembly: NullGuard(ValidationFlags.All)]`

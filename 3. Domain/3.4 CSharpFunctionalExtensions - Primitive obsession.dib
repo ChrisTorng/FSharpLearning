@@ -1,0 +1,68 @@
+#!markdown
+
+# [Functional C#: Primitive obsession](https://enterprisecraftsmanship.com/posts/functional-c-primitive-obsession/)
+
+#!csharp
+
+public class Customer
+{
+    public string Name { get; }
+    public Customer(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name can't be empty");
+            if (name.Length > 50)
+            throw new ArgumentException("Name is too long");
+        Name = name;
+    }
+}
+
+#!csharp
+
+#r "nuget:CSharpFunctionalExtensions"
+using CSharpFunctionalExtensions;
+public class CustomerName
+{
+    public string Value { get; }
+    private CustomerName(string name)
+    {
+        Value = name;
+    }
+    public static Result<CustomerName> Create(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<CustomerName>("Name can't be empty");
+        if (name.Length > 50)
+            return Result.Failure<CustomerName>("Name is too long");
+        return Result.Success(new CustomerName(name));
+    }
+
+    // implicit operator string for convert to string
+    // Equals/==/!=
+    // GetHashCode for Dictionary hash
+    // JsonConverter for System.Text.Json/Newtonsoft.Json
+    // TypeConverter for ASP.NET Core
+    // ValueConverter for Entity Framework Core 
+}
+
+public class Customer
+{
+    public CustomerName Name { get; }
+    public Customer(CustomerName name)
+    {
+        if (name is null)
+            throw new ArgumentNullException(nameof(name));
+        Name = name;
+    }
+}
+
+#!csharp
+
+Result<CustomerName> nameResult = CustomerName.Create("Customer name");
+
+if (nameResult.IsFailure)
+    //ModelState.AddModelError("Name", nameResult.Error);
+    return;
+
+Customer customer = new Customer(nameResult.Value);
+return customer;

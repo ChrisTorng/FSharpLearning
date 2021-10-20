@@ -4,7 +4,6 @@
 
 #!csharp
 
-using static System.Console;
 public class ProductPile
 {
     public string ProductName { get; }
@@ -33,6 +32,7 @@ public class ProductPile
 #!csharp
 
 #r "nuget:FluentAssertions"
+using FluentAssertions;
 using static FluentAssertions.FluentActions;
 
 var threeProduct = new ProductPile("product", 3);
@@ -42,4 +42,4 @@ soldOneProduct.Amount.Should().Be(2);
 Invoking(() => new ProductPile(null, 1))
     .Should().Throw<ArgumentNullException>();
 Invoking(() => new ProductPile("product", -1))
-.Should().Throw<ArgumentOutOfRangeException>();
+    .Should().Throw<ArgumentOutOfRangeException>();
