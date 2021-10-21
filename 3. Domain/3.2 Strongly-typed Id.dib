@@ -74,4 +74,7 @@ public partial struct ProjectId : System.IEquatable<ProjectId>
 
 ## Issues
 
-* 
+* `partial` class
+* Low test code coverage
+* Live Unit Testing not support
+* Generated code not optimized

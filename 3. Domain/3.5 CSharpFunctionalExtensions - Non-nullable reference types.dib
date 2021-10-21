@@ -2,6 +2,30 @@
 
 # [Non-nullable reference types](https://enterprisecraftsmanship.com/posts/functional-c-non-nullable-reference-types/)
 
-[NullGuard.Fody](https://github.com/Fody/NullGuard)
+#!csharp
+
+public class Customer {}
+public class Repository { public Customer GetById(string id) => null; }
+var repository = new Repository();
+public void ProcessCustomer(Customer customer) {}
+
+#!csharp
+
+Customer customer = repository.GetById("123");
+ProcessCustomer(customer);
+
+#!markdown
+
+[NullGuard.Fody](https://github.com/Fody/NullGuard), but [Licensing/Patron FAQ](https://github.com/Fody/Home/blob/master/pages/licensing-patron-faq.md)
 
 `[assembly: NullGuard(ValidationFlags.All)]`
+
+#!csharp
+
+#r "nuget:CSharpFunctionalExtensions,2.24.0"
+using CSharpFunctionalExtensions;
+
+Maybe<Customer> customer = repository.GetById("123");
+//ProcessCustomer(customer); // Compile error
+if (customer.HasValue)
+    ProcessCustomer(customer.Value);

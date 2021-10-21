@@ -31,7 +31,7 @@ public class ProductPile
 
 #!csharp
 
-#r "nuget:FluentAssertions"
+#r "nuget:FluentAssertions,6.1.0"
 using FluentAssertions;
 using static FluentAssertions.FluentActions;
 

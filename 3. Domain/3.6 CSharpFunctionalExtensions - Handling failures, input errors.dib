@@ -1,0 +1,132 @@
+#!markdown
+
+# [Handling failures, input errors](https://enterprisecraftsmanship.com/posts/functional-c-handling-failures-input-errors/)
+
+#!csharp
+
+public class Customer { public Customer(string name) {} }
+public class Billing { public static Billing Create(string billingInfo) => null; }
+public class PaymentGateway { public void ChargeCommission(Billing billing) {} }
+public class Repository { public void Save(Customer customer) {} }
+public class EmailSender { public void SendGreetings(string name) {} }
+public class Logger { public void Log(string message) {} }
+var billing = new BillingInfo();
+var paymentGateway = new PaymentGateway();
+var repository = new Repository();
+var emailSender = new EmailSender();
+var logger = new Logger();
+
+#!csharp
+
+public void CreateCustomer(string name, string billingInfo)
+{
+    var customer = new Customer(name);
+    var billing = Billing.Create(billingInfo);
+    paymentGateway.ChargeCommission(billing);
+    repository.Save(customer);
+    emailSender.SendGreetings(name);
+}
+
+#!csharp
+
+#r "nuget:CSharpFunctionalExtensions,2.24.0"
+using CSharpFunctionalExtensions;
+public class CustomerName
+{
+    public string Value { get; }
+    private CustomerName(string name) => Value = name;
+    public static Result<CustomerName> Create(string name) =>
+        Result.Success(new CustomerName(name));
+}
+public class Customer
+{
+    public CustomerName Name { get; }
+    public Customer(CustomerName name) => Name = name;
+}
+public class Billing { public static Result<Billing> Create(string billingInfo) => null; }
+public class PaymentGateway { public void ChargeCommission(Billing billing) {} public void Rollback() {} }
+public class Repository { public void Save(Customer customer) {} }
+public class EmailSender { public void SendGreetings(CustomerName name) {} }
+var billing = new BillingInfo();
+var paymentGateway = new PaymentGateway();
+var repository = new Repository();
+var emailSender = new EmailSender();
+
+#!csharp
+
+public bool CreateCustomer(string name, string billingInfo)
+{
+    var customerNameResult = CustomerName.Create(name);
+    if (customerNameResult.IsFailure) {
+        logger.Log(customerNameResult.Error);
+        return false;
+    }
+    var customer = new Customer(customerNameResult.Value);
+
+    var billingResult = Billing.Create(billingInfo);
+    if (billingResult.IsFailure) {
+        logger.Log(billingResult.Error);
+        return false;
+    }
+    var billing = billingResult.Value;
+
+    try
+    {
+        paymentGateway.ChargeCommission(billing); 
+    }
+    catch (Exception ex)
+    {
+        logger.Log("Cannot ChargeCommission: " + ex.ToString());
+        return false;
+    }
+
+    try
+    {
+        repository.Save(customer); 
+    }
+    catch (Exception ex)
+    {
+        paymentGateway.Rollback();
+        logger.Log("Cannot Save: " + ex.ToString());
+        return false;
+    }
+
+    try
+    {
+        emailSender.SendGreetings(customer.Name); 
+    }
+    catch (Exception ex)
+    {
+        logger.Log("Cannot SendGreetings: " + ex.ToString());
+        return false;
+    }
+
+    return true;
+}
+
+#!csharp
+
+public class PaymentGateway { public Result ChargeCommission(Billing billing) => Result.Success(); public void Rollback() {} }
+public class Repository { public Result Save(Customer customer) => Result.Success(); }
+public class EmailSender { public Result SendGreetings(CustomerName name) => Result.Success(); }
+public class Logger { public Result Log(Result result) => result; }
+var paymentGateway = new PaymentGateway();
+var repository = new Repository();
+var emailSender = new EmailSender();
+var logger = new Logger();
+
+#!csharp
+
+public Result CreateCustomer(string name, string billingInfo)
+{
+    var customerNameResult = CustomerName.Create(name);
+    var billingResult = Billing.Create(billingInfo);
+
+    return Result.Combine(customerNameResult, billingResult)
+        .Bind(() => paymentGateway.ChargeCommission(billingResult.Value))
+        .Bind(() => Result.Success(new Customer(customerNameResult.Value)))
+        .Bind(customer => repository.Save(customer)
+            .OnFailure(() => paymentGateway.Rollback()))
+        .Bind(() => emailSender.SendGreetings(customerNameResult.Value))
+        .Finally(result => logger.Log(result));
+}
