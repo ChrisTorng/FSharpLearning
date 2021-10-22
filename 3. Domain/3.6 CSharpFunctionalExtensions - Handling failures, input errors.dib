@@ -130,3 +130,21 @@ public Result CreateCustomer(string name, string billingInfo)
         .Bind(() => emailSender.SendGreetings(customerNameResult.Value))
         .Finally(result => logger.Log(result));
 }
+
+#!markdown
+
+The method is a command and it can’t fail:
+
+`public void Save(Customer customer)`
+
+The method is a query and it can’t fail:
+
+`public Customer GetById(long id)`
+
+The method is a command and it can fail:
+
+`public Result Save(Customer customer)`
+
+The method is a query and it can fail:
+
+`public Result<Customer> GetById(long id)`

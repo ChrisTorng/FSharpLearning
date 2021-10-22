@@ -1,0 +1,138 @@
+#!markdown
+
+# [Why use F#?](https://fsharpforfunandprofit.com/why-use-fsharp/)
+
+## Conciseness
+
+#!fsharp
+
+// one-liners
+[1..100] |> List.sum |> printfn "sum=%d"
+
+// no curly braces, semicolons or parentheses
+let square x = x * x
+let sq = square 42
+
+// simple types in one line
+type Person = {First:string; Last:string}
+
+// complex types in a few lines
+type Employee =
+  | Worker of Person
+  | Manager of Employee list
+
+// type inference
+let jdoe = {First="John"; Last="Doe"}
+let worker = Worker jdoe
+let manager = Manager [worker]
+
+// pattern matching
+let isEmployee p =
+  match p with
+    | Worker _ -> true
+    //| Manager _ -> false
+isEmployee worker
+isEmployee manager
+
+#!markdown
+
+## Convenience
+
+#!fsharp
+
+// automatic equality and comparison
+type Person = {First:string; Last:string}
+let person1 = {First="john"; Last="Doe"}
+let person2 = {First="john"; Last="Doe"}
+printfn "Equal? %A"  (person1 = person2)
+
+// easy composition of functions
+let add2times3 = (+) 2 >> (*) 3
+let result = add2times3 5
+
+#!markdown
+
+## Correctness
+
+#!fsharp
+
+// strict type checking
+//printfn "print string %s" 123 //compile error
+
+// all values immutable by default
+//person1.First <- "new name"  //assignment error
+
+// never have to check for nulls
+let makeNewString str =
+   //str can always be appended to safely
+   let newString = str + " new!"
+   newString
+
+// embed business logic into types
+type ShoppingCart =
+   | Amount of int
+   | Nothing
+let soldOne cart =
+   match cart with
+      | Amount 1 -> Nothing
+      | Amount a -> Amount (a - 1)
+
+let shoppingCart = Amount 1
+let emptyShoppingCart = soldOne shoppingCart
+
+emptyShoppingCart   // compile error!
+
+// units of measure
+[<Measure>] type m
+[<Measure>] type cm
+let cmPerMeter = 100.0<cm/m>
+let convertMeterToCm x = x * cmPerMeter
+let distance = 1.0<cm> + convertMeterToCm 2.0<m> + 3.0<m> // error!
+distance
+
+#!markdown
+
+## Concurrency
+
+#!fsharp
+
+// easy async logic with "async" keyword
+let! result = async {something}
+
+// easy parallelism
+Async.Parallel [ for i in 0..40 ->
+    async { return fib(i) } ]
+
+// message queues
+MailboxProcessor.Start(fun inbox-> async{
+    let! msg = inbox.Receive()
+    printfn "message is: %s" msg
+    })
+
+#!markdown
+
+## Completeness
+
+#!fsharp
+
+// impure code when needed
+let mutable counter = 0
+
+// create C# compatible classes and interfaces
+type IEnumerator<'a> =
+    abstract member Current : 'a
+    abstract MoveNext : unit -> bool
+
+// extension methods
+type System.Int32 with
+    member this.IsEven = this % 2 = 0
+
+let i = 20
+if i.IsEven then printfn "'%i' is even" i
+
+// UI code
+open System.Windows.Forms
+let form = new Form(Width = 400, Height = 300, Visible = true, Text = "Hello World")
+form.TopMost <- true
+form.Click.Add (fun args -> printfn "clicked!")
+form.Show()

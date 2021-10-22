@@ -6,7 +6,7 @@
 
 #!csharp
 
-#r "nuget:Meziantou.Framework.StronglyTypedId"
+#r "nuget:Meziantou.Framework.StronglyTypedId,1.0.15"
 using Meziantou.Framework.StronglyTypedId;
 
 [StronglyTypedId(typeof(int))]
