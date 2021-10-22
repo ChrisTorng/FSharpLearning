@@ -10,7 +10,7 @@ public class PaymentGateway { public void ChargeCommission(Billing billing) {} }
 public class Repository { public void Save(Customer customer) {} }
 public class EmailSender { public void SendGreetings(string name) {} }
 public class Logger { public void Log(string message) {} }
-var billing = new BillingInfo();
+var billing = new Billing();
 var paymentGateway = new PaymentGateway();
 var repository = new Repository();
 var emailSender = new EmailSender();
@@ -47,7 +47,7 @@ public class Billing { public static Result<Billing> Create(string billingInfo) 
 public class PaymentGateway { public void ChargeCommission(Billing billing) {} public void Rollback() {} }
 public class Repository { public void Save(Customer customer) {} }
 public class EmailSender { public void SendGreetings(CustomerName name) {} }
-var billing = new BillingInfo();
+var billing = new Billing();
 var paymentGateway = new PaymentGateway();
 var repository = new Repository();
 var emailSender = new EmailSender();

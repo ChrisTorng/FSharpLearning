@@ -11,7 +11,7 @@ public class Customer
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name can't be empty");
-            if (name.Length > 50)
+        if (name.Length > 50)
             throw new ArgumentException("Name is too long");
         Name = name;
     }
@@ -21,13 +21,9 @@ public class Customer
 
 #r "nuget:CSharpFunctionalExtensions,2.24.0"
 using CSharpFunctionalExtensions;
-public class CustomerName
+public class CustomerName : SimpleValueObject<string>
 {
-    public string Value { get; }
-    private CustomerName(string name)
-    {
-        Value = name;
-    }
+    private CustomerName(string name) : base(name) {}
     public static Result<CustomerName> Create(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -37,9 +33,12 @@ public class CustomerName
         return Result.Success(new CustomerName(name));
     }
 
+    // These are inherited from SimpleValueObject<string>
     // ToString/implicit operator string for convert to string
     // Equals/==/!=
     // GetHashCode for Dictionary hash
+
+    // These are still needed
     // JsonConverter for System.Text.Json/Newtonsoft.Json
     // TypeConverter for ASP.NET Core
     // ValueConverter for Entity Framework Core 
@@ -66,29 +65,3 @@ if (nameResult.IsFailure)
 
 Customer customer = new Customer(nameResult.Value);
 return customer;
-
-#!csharp
-
-using CSharpFunctionalExtensions;
-public class CustomerName : SimpleValueObject<string>
-{
-    private CustomerName(string name) : base(name) {}
-    public static Result<CustomerName> Create(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure<CustomerName>("Name can't be empty");
-        if (name.Length > 50)
-            return Result.Failure<CustomerName>("Name is too long");
-        return Result.Success(new CustomerName(name));
-    }
-
-    // These are inherited from SimpleValueObject<string>
-    // ToString/implicit operator string for convert to string
-    // Equals/==/!=
-    // GetHashCode for Dictionary hash
-
-    // These are still needed
-    // JsonConverter for System.Text.Json/Newtonsoft.Json
-    // TypeConverter for ASP.NET Core
-    // ValueConverter for Entity Framework Core 
-}

@@ -57,10 +57,10 @@ let result = add2times3 5
 #!fsharp
 
 // strict type checking
-//printfn "print string %s" 123 //compile error
+printfn "print string %s" 123 //compile error
 
 // all values immutable by default
-//person1.First <- "new name"  //assignment error
+person1.First <- "new name"  //assignment error
 
 // never have to check for nulls
 let makeNewString str =
@@ -69,18 +69,17 @@ let makeNewString str =
    newString
 
 // embed business logic into types
-type ShoppingCart =
-   | Amount of int
-   | Nothing
-let soldOne cart =
-   match cart with
-      | Amount 1 -> Nothing
-      | Amount a -> Amount (a - 1)
+// type ShoppingCart =
+//    | Amount of int
+//    | Nothing
+// let soldOne cart =
+//    match cart with
+//       | Amount 1 -> Nothing
+//       | Amount a -> Amount (a - 1)
 
-let shoppingCart = Amount 1
-let emptyShoppingCart = soldOne shoppingCart
-
-emptyShoppingCart   // compile error!
+// let shoppingCart = Amount 1
+// let emptyShoppingCart = soldOne shoppingCart
+emptyShoppingCart.remove   // compile error!
 
 // units of measure
 [<Measure>] type m
@@ -88,7 +87,6 @@ emptyShoppingCart   // compile error!
 let cmPerMeter = 100.0<cm/m>
 let convertMeterToCm x = x * cmPerMeter
 let distance = 1.0<cm> + convertMeterToCm 2.0<m> + 3.0<m> // error!
-distance
 
 #!markdown
 
