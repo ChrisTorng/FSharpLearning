@@ -13,18 +13,14 @@ public class ProductPile
         ProductName = productName ??
             throw new ArgumentNullException(nameof(productName));
         if (amount < 0)
-        {
             throw new ArgumentOutOfRangeException(nameof(amount));
-        }
         Amount = amount;
     }
     public ProductPile Sold(int soldAmount)
     {
         int newAmount = Amount - soldAmount;
         if (newAmount < 0)
-        {
             throw new ArgumentOutOfRangeException(nameof(soldAmount));
-        }
         return new ProductPile(ProductName, newAmount);
     }
 }
