@@ -68,8 +68,8 @@ WriteLine(TakeFive("Hello, world!"));
 WriteLine(TakeFive("Hi!"));
 WriteLine(TakeFive(new[] { '1', '2', '3', '4', '5', '6', '7' }));
 WriteLine(TakeFive(new[] { 'a', 'b', 'c' }));
-WriteLine(TakeFive(null));
-WriteLine(TakeFive(1));
+//WriteLine(TakeFive(null));
+//WriteLine(TakeFive(1));
 
 #!markdown
 
