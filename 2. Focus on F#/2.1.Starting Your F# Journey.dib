@@ -1,0 +1,63 @@
+#!markdown
+
+# Starting Your F# Journey
+
+[github.com/swlaschin/dotnetconf2021](https://github.com/swlaschin/dotnetconf2021)
+
+#!fsharp
+
+// Pipeline operator
+//squareDoubleAdd42 x = add42(double(square(x)))
+let squareDoubleAdd42 x = x |> square |> double |> add42
+let squareDoubleAdd42 x =
+    x
+    |> square
+    |> double
+    |> add42
+
+#!fsharp
+
+let myImportantWorkflow query =
+    query
+    |> checkAuthorization
+    |> loadFromDb
+    |> JsonSerializer.Deserialize
+    |> log "before processing"
+    |> List.map (fun x -> x * 2)
+    |> List.filter (fun x -> x <= 6)
+    |> log "after processing"
+    |> JsonSerializer.Serialize
+    |> saveToDb
+
+#!fsharp
+
+// Record type
+type Thing = { Id: int; Description: string }
+let aThing = { Id=1; Description="a thing" }
+let anotherThing = {aThing with Id=2}
+
+#!fsharp
+
+// Discriminated union: "choice" type, "OR" types
+
+type PrimaryColor = Red | Yellow | Blue
+type RGB = {R:int; G:int; B:int}
+type Color =
+    | Primary of PrimaryColor
+    | RGB of RGB
+    | Named of string
+
+#!fsharp
+
+module PaymentDomain =
+    type EmailAddress = string
+    type CardType = Visa | Mastercard
+    type CardNumber = string
+    type CreditCardInfo = {
+        CardType: CardType
+        CardNumber: CardNumber
+    }
+    type PaymentMethod =
+        | Cash
+        | PayPal of EmailAddress
+        | Card of CreditCardInfo
