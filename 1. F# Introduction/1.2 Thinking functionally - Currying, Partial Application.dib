@@ -1,0 +1,64 @@
+#!markdown
+
+# [Thinking functionally](https://fsharpforfunandprofit.com/series/thinking-functionally/)
+
+## [Currying](https://fsharpforfunandprofit.com/posts/currying/)
+
+#!fsharp
+
+//normal version
+let printTwoParameters x y =
+   printfn "x=%i y=%i" x y
+
+//explicitly curried version
+let printTwoParameters2 x  =    // only one parameter!
+   let subFunction y =
+      printfn "x=%i y=%i" x y  // new function with one param
+   subFunction
+
+printTwoParameters 1 2
+
+let print1WithParamteter = printTwoParameters 1
+print1WithParamteter 2
+
+(printTwoParameters 1) 2
+
+printTwoParameters2 1 2
+
+#!markdown
+
+## [Partial Application](https://fsharpforfunandprofit.com/posts/partial-application/)
+
+#!fsharp
+
+// create an adder that supports a pluggable logging function
+let adderWithPluggableLogger logger x y =
+  logger "x" x
+  logger "y" y
+  let result = x + y
+  logger "x+y"  result
+  result
+
+// create a logging function that writes to the console
+let consoleLogger argName argValue =
+  printfn "%s=%A" argName argValue
+
+//create an adder with the console logger partially applied
+let addWithConsoleLogger = adderWithPluggableLogger consoleLogger
+addWithConsoleLogger 1 2
+
+// create a logging function that adds warning text
+let warningLogger argName argValue =
+  printfn "*** %s=%A ***" argName argValue
+
+//create an adder with the popup logger partially applied
+let addWithWarningLogger = adderWithPluggableLogger warningLogger
+addWithWarningLogger 1 2
+
+#!fsharp
+
+let startsWith (lookFor:string) (s:string) =
+  s.StartsWith(lookFor)
+
+["the"; "quick"; "brown"; "fox"]
+  |> List.filter (startsWith "f")
