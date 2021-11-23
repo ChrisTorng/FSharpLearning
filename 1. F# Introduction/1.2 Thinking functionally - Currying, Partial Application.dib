@@ -60,5 +60,16 @@ addWithWarningLogger 1 2
 let startsWith (lookFor:string) (s:string) =
   s.StartsWith(lookFor)
 
-["the"; "quick"; "brown"; "fox"]
-  |> List.filter (startsWith "f")
+display(["the"; "quick"; "brown"; "fox"]
+  |> List.filter (startsWith "f"))
+
+let replace oldStr newStr (s:string) =
+  s.Replace(oldValue=oldStr, newValue=newStr)
+  
+display("hello"
+  |> replace "h" "j"
+  |> startsWith "j")
+
+// Function composition
+let compositeOp = replace "h" "j" >> startsWith "j"
+display(compositeOp "hello")

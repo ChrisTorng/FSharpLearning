@@ -1,0 +1,42 @@
+#!markdown
+
+# [Functional Programming Design Patterns](https://fsharpforfunandprofit.com/fppatterns/)
+
+## Hollywood principle: Don't call us, we'll call you
+
+#!csharp
+
+int Divide(int top, int bottom)
+{
+    if (bottom == 0)
+        throw new InvalidOperationException("Divide by 0");
+    else
+        return top / bottom;
+}
+
+#!csharp
+
+void Divide(int top, int bottom,
+    Action ifZero, Action<int> ifSuccess)
+{
+    if (bottom == 0)
+        ifZero();
+    else
+        ifSuccess(top / bottom);
+}
+
+#!fsharp
+
+let divide ifZero ifSuccess top bottom =
+    if (bottom = 0)
+    then ifZero()
+    else ifSuccess (top / bottom)
+
+#!fsharp
+
+let ifZero1 () = printfn "bad"
+let ifSuccess1 x = printfn "good %i" x
+
+let divide1 = divide ifZero1 ifSuccess1
+divide1 6 4
+divide1 6 0

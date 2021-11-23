@@ -1,0 +1,112 @@
+#!markdown
+
+# [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/)
+
+[Railway Oriented Programming example](http://bit.ly/rop-example)
+
+#!csharp
+
+string UpdateCustomer()
+{
+    var request = receiveRequest();
+    validateRequest(request);
+    canonicalizeEmail(request);
+    db.updateDbFromRequest(request);
+    smtpServer.sendEmail(request.Email);
+    return "OK";
+}
+
+#!csharp
+
+string UpdateCustomerWithErrorHandling()
+{
+    var request = receiveRequest();
+    validateRequest(request);
+    if (!isValidated)
+        return "Request is not valid";
+
+    canonicalizeEmail(request);
+    try
+    {
+        var result = db.updateDbFromRequest(request);
+        if (!result)
+            return "Customer record not found";
+    } catch {
+        return "DB error: Customer record not updated";
+    }
+
+    if (!smtpServer.sendEmail(request.Email))
+        log.Error("Customer email not sent");
+
+    return "OK";
+}
+
+#!fsharp
+
+let updateCustomer =
+    receiveRequest
+    >> validateRequest
+    >> canonicalizeEmail
+    >> updateDbFromRequest
+    >> sendEmail
+    >> returnMessage
+
+#!markdown
+
+![Railway Oriented Programming](rop1.png)
+
+#!fsharp
+
+type EmailAddress = string
+
+type ErrorMessage =
+    | NameMustNotBeBlank
+    | EmailMustNotBeBlank
+    | EmailNotValid of EmailAddress
+
+type TwoTrack<'TEntity> =
+    | Success of 'TEntity
+    | Failure of ErrorMessage
+
+type Input = {name:string; email:string}
+
+let validateInput input =
+    if input.name = "" then
+        TwoTrack.Failure NameMustNotBeBlank
+    else if input.email = "" then
+        TwoTrack.Failure EmailMustNotBeBlank
+    else if (input.email doesn't match regex) then
+        TwoTrack.Failure EmailNotValid input.email
+    else
+        TwoTrack.Success input // happy path
+
+let bind switchFunction = 
+    fun twoTrackInput ->
+        match twoTrackInput with
+        | Success f -> switchFunction f
+        | Failure m -> Failure m
+
+let (>>=) twoTrackInput switchFunction =
+    bind switchFunction twoTrackInput
+
+let validateRequest twoTrackInput =
+    twoTrackInput
+    >>= nameNotBlank
+    >>= name50
+    >>= emailNotBlank   
+
+#!fsharp
+
+let updateCustomerWithErrorHandling =
+    receiveRequest
+    >>= validateRequest
+    >>= canonicalizeEmail
+    >>= updateDbFromRequest
+    >>= sendEmail
+    >>= returnMessage
+
+#!markdown
+
+* Designing for errors
+* Parallel track
+* Domain events

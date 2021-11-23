@@ -1,0 +1,15 @@
+#!fsharp
+
+#r "nuget:FSharp.Data"
+open FSharp.Data
+
+[<Literal>]
+let sample = "http://api.openweathermap.org/data/2.5/weather?q=London"
+let apiUrl = "http://api.openweathermap.org/data/2.5/weather?q="
+
+type Menu = JsonProvider<"sample.json">
+
+let menu = Menu.Load("sample.json")
+display menu.Menu.Id
+display menu.Menu.Popup.Menuitem[0].Value
+display menu.Menu.Popup.Menuitem[0].Onclick
