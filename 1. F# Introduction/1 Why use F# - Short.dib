@@ -30,9 +30,9 @@ let manager = Manager [worker]
 let isEmployee p =
   match p with
     | Worker _ -> true
-    //| Manager _ -> false
-isEmployee worker
-isEmployee manager
+    | Manager _ -> false
+display(isEmployee worker)
+display(isEmployee manager)
 
 #!markdown
 
@@ -49,6 +49,7 @@ printfn "Equal? %A"  (person1 = person2)
 // easy composition of functions
 let add2times3 = (+) 2 >> (*) 3
 let result = add2times3 5
+display(result)
 
 #!markdown
 

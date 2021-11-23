@@ -89,12 +89,6 @@ let bind switchFunction =
 let (>>=) twoTrackInput switchFunction =
     bind switchFunction twoTrackInput
 
-let validateRequest twoTrackInput =
-    twoTrackInput
-    >>= nameNotBlank
-    >>= name50
-    >>= emailNotBlank   
-
 #!fsharp
 
 let updateCustomerWithErrorHandling =
