@@ -22,10 +22,10 @@ let deployment = arm {
     ]
 }
 
-// Deploy it to Azure!
 deployment
 |> Writer.quickWrite "myResourceGroup"
 
+// Deploy it to Azure!
 // deployment
 // |> Deploy.execute "myResourceGroup" Deploy.NoParameters
 // |> ignore

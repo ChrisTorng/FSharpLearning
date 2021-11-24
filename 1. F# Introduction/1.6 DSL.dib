@@ -27,3 +27,5 @@ display example2
 // the C# equivalent would probably be more like this:
 // getDate().Interval(5).Days().Ago()
 // getDate().Interval(1).Hour().Later()
+// getDate(5, DateEnum.Day, true)
+// getDate(1, DateEnum.Hour, false)
