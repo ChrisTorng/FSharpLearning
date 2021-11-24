@@ -15,6 +15,7 @@ let sq = square 42
 
 // simple types in one line
 type Person = {First:string; Last:string}
+type Pet = {First:string; Last:string}
 
 // complex types in a few lines
 type Employee =
@@ -22,7 +23,7 @@ type Employee =
   | Manager of Employee list
 
 // type inference
-let jdoe = {First="John"; Last="Doe"}
+let jdoe: Person = {First="John"; Last="Doe"}
 let worker = Worker jdoe
 let manager = Manager [worker]
 
