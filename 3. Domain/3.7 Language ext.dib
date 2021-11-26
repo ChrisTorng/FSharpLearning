@@ -1,0 +1,64 @@
+#!markdown
+
+# [C# Functional Programming Language Extensions](https://github.com/louthy/language-ext)
+
+#!csharp
+
+#r "nuget:LanguageExt.Core"
+#r "nuget:LanguageExt.CodeGen"
+
+using LanguageExt;
+using static LanguageExt.Prelude;
+
+#!csharp
+
+// Tuple
+var name = Tuple("Paul","Louth", "extra");
+display(name);
+display(name.Map( (first, last, _) => $"{first} {last}"));
+display(map( name, (first, last, _) => $"{first} {last}"));
+
+#!csharp
+
+// Option<> for avoid null
+var optional = Some(123);
+display(optional.Match( 
+            Some: v  => v * 2,
+            None: () => 0));
+display(match(optional, 
+              Some: v  => v * 2,
+              None: () => 0));
+display(optional
+            .Some(v  => v * 2)
+            .None(() => 0));
+
+Option<int> none = None;
+display(none.Match( 
+            Some: v  => v * 2,
+            None: () => 0));
+display(match(none, 
+              Some: v  => v * 2,
+              None: () => 0));
+display(none
+            .Some(v  => v * 2)
+            .None(() => 0));
+
+// no optional.Value
+
+#!csharp
+
+[Union]
+public interface Shape
+{
+    Shape Rectangle(float width, float length);
+    Shape Circle(float radius);
+    Shape Prism(float width, float height);
+}
+
+public double GetArea(Shape shape)
+    => shape switch
+    {
+        Rectangle rec => rec.Length * rec.Width,
+        Circle circle => 2 * Math.PI * circle.Radius,
+        _ => throw new NotImplementedException()
+    };

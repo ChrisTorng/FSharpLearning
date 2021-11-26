@@ -1,0 +1,121 @@
+#!markdown
+
+# [Thinking Functionally: Function Signatures](https://github.com/louthy/language-ext/wiki/Thinking-Functionally:-Function-Signatures)
+
+#!csharp
+
+#r "nuget:LanguageExt.Core"
+#r "nuget:LanguageExt.CodeGen"
+
+using LanguageExt;
+using static LanguageExt.Prelude;
+
+#!csharp
+
+DateTime CreateDate(int year, int month, int day) =>
+    new DateTime(year, month, day);
+
+#!csharp
+
+using LanguageExt.ClassInstances;
+using LanguageExt.ClassInstances.Const;
+using LanguageExt.ClassInstances.Pred;
+
+public class Year : NumType<Year, TInt, int, Range<TInt, int, I1970, I2050>>
+{
+    Year(int x) : base(x) { }
+}
+
+public class Month : NumType<Month, TInt, int, Range<TInt, int, I1, I12>>
+{
+    Month(int x) : base(x) { }
+}
+
+public class Day : NumType<Day, TInt, int, Range<TInt, int, I1, I31>>
+{
+    Day(int x) : base(x) { }
+}
+
+DateTime CreateDate(Year year, Month month, Day day) =>
+    new DateTime(year.Value, month.Value, day.Value);
+
+display(CreateDate(Year.New(2021), Month.New(11), Day.New(30)));
+//CreateDate(Year.New(2021), Month.New(11), Day.New(31));
+CreateDate(Year.New(2021), Month.New(11), Day.New(32));
+
+#!csharp
+
+Try<DateTime> CreateDate(Year year, Month month, Day day) =>
+    () =>
+    {
+        display(1);
+        return new DateTime(year.Value, month.Value, day.Value);
+    };
+
+display(2);    
+var invalidDate = CreateDate(Year.New(2021), Month.New(11), Day.New(31));
+display(3);    
+
+display(invalidDate.Match(
+    Succ: dt => $"The date is {dt}",
+    Fail: ex => $"Invalid date ({ex.Message})"
+    ));
+display(4);
+
+#!csharp
+
+public static class TupleExt
+{
+    public static Try<DateTime> ToDate(this (Year year, Month month, Day day) date) => () =>
+       new DateTime(date.year.Value, date.month.Value, date.day.Value);
+}
+
+var date = (Year.New(2021), Month.New(11), Day.New(31)).ToDate();
+
+#!csharp
+
+Try<DateTime> fromDate = CreateDate(Year.New(2021), Month.New(11), Day.New(30));
+Try<DateTime> toDate = CreateDate(Year.New(2021), Month.New(12), Day.New(20));
+
+display(fromDate.Match(
+    Succ: begin =>
+        toDate.Match(
+            Succ: end => end - begin,
+            Fail: ex  => TimeSpan.Zero),
+    Fail: ex => TimeSpan.Zero));
+
+#!csharp
+
+var result = from begin in fromDate
+             from end in toDate
+             select end - begin;
+
+display(result.Match(
+            Succ: dt => $"The date is {dt}",
+            Fail: ex => $"Invalid date ({ex.Message})"
+            ));
+
+#!csharp
+
+var result = from begin in fromDate
+             from end in invalidDate
+             select end - begin;
+
+display(result.Match(
+            Succ: dt => $"The date is {dt}",
+            Fail: ex => $"Invalid date ({ex.Message})"
+            ));
+
+#!csharp
+
+var result = from a in listA
+             from b in listB
+             select Process(a, b);
+
+foreach(var a in listA)
+{
+    foreach(var b in listB)
+    {
+         yield return Process(a, b);
+    }
+}

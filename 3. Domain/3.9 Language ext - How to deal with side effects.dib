@@ -1,0 +1,108 @@
+#!markdown
+
+# [Thinking Functionally: How to deal with side effects](https://github.com/louthy/language-ext/wiki/How-to-deal-with-side-effects)
+
+#!csharp
+
+#r "nuget:LanguageExt.Core"
+#r "nuget:LanguageExt.CodeGen"
+
+using LanguageExt;
+using static LanguageExt.Prelude;
+using LanguageExt.Common;
+
+#!csharp
+
+World HandleEvent(World world, Event event) => { }
+
+eventualWorldState = events.Fold(initialWorldState, HandleEvent);
+
+#!csharp
+
+using System.IO;
+
+static Func<Option<string>> readAllText(string path) =>
+    () => 
+    {
+        try
+        {
+            return File.ReadAllText(path);
+        }
+        catch
+        {
+            return None;
+        }
+    };
+
+#!csharp
+
+public delegate Either<Error, A> IO<A>();
+
+static IO<string> readAllText(string path) =>
+    () => File.ReadAllText(path);
+
+static IO<Unit> writeAllText(string path, string text) =>
+    () => { File.WriteAllText(path, text); return unit; };
+
+#!csharp
+
+public static class IO
+{
+    // Allows us to lift pure values into the IO domain
+    public static IO<A> Pure(A value) => 
+        () => value;
+
+    // Wrap up the error handling
+    public Either<Error, A> Run<A>(this IO<A> ma)
+    {
+        try
+        {
+             return ma();
+        }
+        catch(Exception e)
+        {
+             return Error.New("IO error", e);
+        }
+    }
+
+    // Functor map
+    public IO<B> Select<A, B>(this IO<A> ma, Func<A, B> f) => () =>
+        f(ma());
+
+    // Functor map
+    public IO<B> Map<A, B>(this IO<A> ma, Func<A, B> f) => () =>
+        Select(ma, f);
+
+    // Monadic bind
+    public IO<B> SelectMany<A, B>(this IO<A> ma, Func<A, IO<B>> f) => () =>
+        f(ma())();
+
+    // Monadic bind
+    public IO<B> Bind<A, B>(this IO<A> ma, Func<A, IO<B>> f) => () =>
+        SelectMany(ma, f);
+
+    // Monadic bind + projection
+    public IO<C> SelectMany<A, B, C>(this IO<A> ma, Func<A, IO<B>> bind, Func<A, B, C> project) => 
+        ma.SelectMany(a => bind(a).Select(b => project(a, b)));
+}
+
+#!csharp
+
+var computation = from text in readAllText(inPath)
+                  from _    in writeAllText(outPath, text)
+                  select unit;
+
+Either<Error, Unit> result = computation.Run();
+
+#!csharp
+
+class Program
+{
+    public static void Main(string[] args)
+    {
+        MainIO(args).Run();
+    }
+
+    static IO<Unit> MainIO(string[] args) =>
+        // ... build your entire application here
+}
