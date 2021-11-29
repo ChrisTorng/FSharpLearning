@@ -1,2 +1,6 @@
 .ionide/
 .fake
+bin/
+obj/
+.vs/
+TestResults/
