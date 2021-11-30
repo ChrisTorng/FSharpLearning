@@ -10,12 +10,14 @@
 [1..100] |> List.sum |> printfn "sum=%d"
 
 // no curly braces, semicolons or parentheses
-let square x = x * x
-let sq = square 42
+let double x = x + x
+let sq1 = double 3
+//let sq2 = double 4.0
+//let sq3 = double "abc"
 
 // simple types in one line
 type Person = {First:string; Last:string}
-type Pet = {First:string; Last:string}
+//type Pet = {First:string; Last:string}
 
 // complex types in a few lines
 type Employee =
@@ -23,7 +25,8 @@ type Employee =
   | Manager of Employee list
 
 // type inference
-let jdoe: Person = {First="John"; Last="Doe"}
+let jdoe = {First="John"; Last="Doe"}
+//let jdoe: Person = {First="John"; Last="Doe"}
 let worker = Worker jdoe
 let manager = Manager [worker]
 
@@ -47,6 +50,10 @@ let person1 = {First="john"; Last="Doe"}
 let person2 = {First="john"; Last="Doe"}
 printfn "Equal? %A"  (person1 = person2)
 
+let add2 = (+) 2
+let add2a n = 2 + n
+display(add2 3)
+display(add2a 3)
 // easy composition of functions
 let add2times3 = (+) 2 >> (*) 3
 let result = add2times3 5
