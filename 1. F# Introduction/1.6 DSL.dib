@@ -2,6 +2,8 @@
 
 # DSL (Domain-specific Language)
 
+[Using functions as building blocks - Mini languages](https://fsharpforfunandprofit.com/posts/conciseness-functions-as-building-blocks/#mini-languages)
+
 #!fsharp
 
 type DateScale = Hour | Hours | Day | Days | Week | Weeks
