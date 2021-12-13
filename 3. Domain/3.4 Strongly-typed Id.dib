@@ -6,7 +6,7 @@
 
 #!csharp
 
-#r "nuget:Meziantou.Framework.StronglyTypedId,1.0.15"
+#r "nuget:Meziantou.Framework.StronglyTypedId"
 using Meziantou.Framework.StronglyTypedId;
 
 [StronglyTypedId(typeof(int))]
@@ -78,3 +78,12 @@ public partial struct ProjectId : System.IEquatable<ProjectId>
 * Low test code coverage
 * Live Unit Testing not support
 * Generated code not optimized
+
+#!csharp
+
+#r "nuget:StronglyTypedId"
+
+#!csharp
+
+[StronglyTypedId]
+public struct StringId {}

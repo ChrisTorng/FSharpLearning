@@ -1,0 +1,96 @@
+#!csharp
+
+void SqlExecute1(int value) => value.ToString();
+void SqlExecute2(string value) => int.Parse(value);
+
+string SqlQuery1(int key) => key.ToString();
+int SqlQuery2(string key) => int.Parse(key);
+
+#!csharp
+
+void Command1(int value)
+{
+    try
+    {
+        SqlExecute1(value);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+void Command2(string value)
+{
+    try
+    {
+        SqlExecute2(value);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+#!csharp
+
+void TryExecute(Action action)
+{
+    try
+    {
+        action();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+TryExecute(() => SqlExecute1(1));
+TryExecute(() => SqlExecute2("1"));
+
+#!csharp
+
+string Query1(int key)
+{
+    try
+    {
+        return SqlQuery1(key);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        return string.Empty;
+    }
+}
+
+int Query2(string key)
+{
+    try
+    {
+        return SqlQuery2(key);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        return 0;
+    }
+}
+
+#!csharp
+
+TResult TryQuery<TResult>(Func<TResult> func, TResult defaultValue)
+{
+    try
+    {
+        return func();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        return defaultValue;
+    }
+}
+
+TryQuery(() => SqlQuery1(1), string.Empty);
+TryQuery(() => SqlQuery2("1"), 0);

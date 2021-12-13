@@ -1,8 +1,0 @@
-#!csharp
-
-#r "nuget:StronglyTypedId"
-
-#!csharp
-
-[StronglyTypedId]
-public struct StringId {}
