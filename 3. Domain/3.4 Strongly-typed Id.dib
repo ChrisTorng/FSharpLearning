@@ -76,7 +76,7 @@ public partial struct ProjectId : System.IEquatable<ProjectId>
 
 * `partial` class
 * Low test code coverage
-* Live Unit Testing not support
+* ~~Live Unit Testing not support~~
 * Generated code not optimized
 
 #!markdown
@@ -91,5 +91,7 @@ public partial struct ProjectId : System.IEquatable<ProjectId>
 
 #!csharp
 
+using StronglyTypedIds;
+
 [StronglyTypedId]
-public struct StringId {}
+public partial struct StringId {}

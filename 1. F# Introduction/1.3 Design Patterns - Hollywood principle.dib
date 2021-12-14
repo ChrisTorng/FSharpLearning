@@ -34,9 +34,27 @@ let divide ifZero ifSuccess top bottom =
 
 #!fsharp
 
-let ifZero1 () = printfn "bad"
-let ifSuccess1 x = printfn "good %i" x
+let ifZero1 () = printfn "Bad"
+let ifSuccess1 x = printfn "Good %i" x
 
-let divide1 = divide ifZero1 ifSuccess1
-divide1 6 4
-divide1 6 0
+let safeDivide = divide ifZero1 ifSuccess1
+safeDivide 6 4
+safeDivide 6 0
+
+#!csharp
+
+Action<int, int> Divide1(Action ifZero, Action<int> ifSuccess) =>
+    (int top, int bottom) =>
+    {
+        if (bottom == 0)
+            ifZero();
+        else
+            ifSuccess(top / bottom);
+    };
+
+var ifZero1 = () => Console.WriteLine("Bad");
+var ifSuccess1 = (int result) => Console.WriteLine($"Good {result}");
+var safeDivide = Divide1(ifZero1, ifSuccess1);
+
+safeDivide(6, 4);
+safeDivide(6, 0);

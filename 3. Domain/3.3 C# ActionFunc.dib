@@ -146,3 +146,32 @@ public static class Disposable
     throw new Exception();
     // scope is disposed and Working on it... is printed to console 
 }
+
+#!csharp
+
+void Divide(int top, int bottom,
+    Action ifZero, Action<int> ifSuccess)
+{
+    if (bottom == 0)
+        ifZero();
+    else
+        ifSuccess(top / bottom);
+}
+
+#!csharp
+
+Action<int, int> Divide1(Action ifZero, Action<int> ifSuccess) =>
+    (int top, int bottom) =>
+    {
+        if (bottom == 0)
+            ifZero();
+        else
+            ifSuccess(top / bottom);
+    };
+
+var ifZero1 = () => Console.WriteLine("Bad");
+var ifSuccess1 = (int result) => Console.WriteLine($"Good {result}");
+var safeDivide = Divide1(ifZero1, ifSuccess1);
+
+safeDivide(6, 4);
+safeDivide(6, 0);
