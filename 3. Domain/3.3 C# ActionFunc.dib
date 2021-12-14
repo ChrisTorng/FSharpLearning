@@ -94,3 +94,55 @@ TResult TryQuery<TResult>(Func<TResult> func, TResult defaultValue)
 
 TryQuery(() => SqlQuery1(1), string.Empty);
 TryQuery(() => SqlQuery2("1"), 0);
+
+#!markdown
+
+# [Async Disposables The Easy Way](https://haacked.com/archive/2021/12/10/async-disposables/)
+
+#!csharp
+
+Console.WriteLine("Working on it...");
+try {
+    Console.WriteLine("Processing!");
+    throw new Exception();
+}
+finally {
+    Console.WriteLine("Done!");
+}
+
+#!csharp
+
+using System.Threading;
+
+public static class Disposable
+{
+    public static IDisposable Create(Action onDispose) =>
+        new ActionDisposable(onDispose);
+
+    private class ActionDisposable : IDisposable
+    {
+        volatile Action _onDispose;
+
+        public ActionDisposable(Action onDispose)
+        {
+            _onDispose = onDispose;
+        }
+
+        public void Dispose()
+        {
+            Interlocked.Exchange(ref _onDispose, null)?.Invoke();
+        }
+    }
+}
+
+#!csharp
+
+{
+    Console.WriteLine("Working on it...");
+    using var scope = Disposable.Create(
+        () => Console.WriteLine("Done!"));
+
+    Console.WriteLine("Processing!");
+    throw new Exception();
+    // scope is disposed and Working on it... is printed to console 
+}
