@@ -1,24 +1,26 @@
 #!markdown
 
-# C# function as parameter and return value
+# C# Higher-Order function
+
+Function as parameter and return value
 
 ## Pass `Action<>` as parameter
 
 #!csharp
 
-void SqlExecute1(int value) => value.ToString();
+void SqlExecute1() => int.Parse("1");
 void SqlExecute2(string value) => int.Parse(value);
 
-string SqlQuery1(int key) => key.ToString();
+string SqlQuery1(string key) => key;
 int SqlQuery2(string key) => int.Parse(key);
 
 #!csharp
 
-void Command1(int value)
+void Command1()
 {
     try
     {
-        SqlExecute1(value);
+        SqlExecute1();
     }
     catch (Exception ex)
     {
@@ -52,8 +54,13 @@ void TryExecute(Action action)
     }
 }
 
-TryExecute(() => SqlExecute1(1));
+TryExecute(SqlExecute1);
 TryExecute(() => SqlExecute2("1"));
+TryExecute(() => 
+    {
+        SqlExecute1();
+        SqlExecute2("1");
+    });
 
 #!markdown
 
@@ -61,7 +68,7 @@ TryExecute(() => SqlExecute2("1"));
 
 #!csharp
 
-string Query1(int key)
+string Query1(string key)
 {
     try
     {
@@ -89,11 +96,11 @@ int Query2(string key)
 
 #!csharp
 
-TResult TryQuery<TResult>(Func<TResult> func, TResult defaultValue)
+TResult TryQuery<TKey, TResult>(Func<TKey, TResult> func, TKey key, TResult defaultValue)
 {
     try
     {
-        return func();
+        return func(key);
     }
     catch (Exception ex)
     {
@@ -102,8 +109,8 @@ TResult TryQuery<TResult>(Func<TResult> func, TResult defaultValue)
     }
 }
 
-TryQuery(() => SqlQuery1(1), string.Empty);
-TryQuery(() => SqlQuery2("1"), 0);
+display(TryQuery(SqlQuery1, "1", string.Empty));
+display(TryQuery((string key) => SqlQuery2(key), "2", 0));
 
 #!markdown
 
@@ -133,16 +140,16 @@ public static class Disposable
 
     private class ActionDisposable : IDisposable
     {
-        volatile Action _onDispose;
+        volatile Action onDispose;
 
         public ActionDisposable(Action onDispose)
         {
-            _onDispose = onDispose;
+            this.onDispose = onDispose;
         }
 
         public void Dispose()
         {
-            Interlocked.Exchange(ref _onDispose, null)?.Invoke();
+            Interlocked.Exchange(ref this.onDispose, null)?.Invoke();
         }
     }
 }

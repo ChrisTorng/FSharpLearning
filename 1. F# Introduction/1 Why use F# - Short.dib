@@ -8,17 +8,17 @@
 
 // one-liners
 [1..100] |> List.sum |> printfn "sum=%d"
-// C#:1. var list = Enumerable.Range(1, 100);
-//       var sum = list.Sum();
-//       Console.WriteLine("sum={0}", sum);
-//    2. Console.WriteLine("sum={0}", Enumerable.Sum(Enumerable.Range(1, 100)));
-//    3. Console.WriteLine("sum={0}", Enumerable.Range(1, 100).Sum());
+// C#: 1. var list = Enumerable.Range(1, 100);
+//        var sum = list.Sum();
+//        Console.WriteLine("sum={0}", sum);
+//     2. Console.WriteLine("sum={0}", Enumerable.Sum(Enumerable.Range(1, 100)));
+//     3. Console.WriteLine("sum={0}", Enumerable.Range(1, 100).Sum());
 
-// no curly braces, semicolons or parentheses
-let double x = x + x
-let sq1 = double 3
-//let sq2 = double 4.0
-//let sq3 = double "abc"
+// no curly braces, comma, semicolons or parentheses
+let add x y = x + y
+let r1 = add 3 4
+//let r2 = add 4.0 5.0
+//let r3 = add "abc" "def"
 
 // simple types in one line
 type Person = {First:string; Last:string}
@@ -27,13 +27,13 @@ type Person = {First:string; Last:string}
 // complex types in a few lines
 type Employee =
   | Worker of Person
-  | Manager of Employee list
+  | Manager of Person list
 
 // type inference
 let jdoe = {First="John"; Last="Doe"}
-//let jdoe: Person = {First="John"; Last="Doe"}
+//let jdoe: Pet = {First="John"; Last="Doe"}
 let worker = Worker jdoe
-let manager = Manager [worker]
+let manager = Manager [jdoe]
 
 // pattern matching
 let isEmployee p =
@@ -56,13 +56,12 @@ let person2 = {First="john"; Last="Doe"}
 printfn "Equal? %A"  (person1 = person2)
 
 let add2 = (+) 2
-let add2a n = 2 + n
+let add2a n = n + 2
 display(add2 3)
 display(add2a 3)
 // easy composition of functions
-let add2times3 = (+) 2 >> (*) 3
-let result = add2times3 5
-display(result)
+let add2times3 = add2 >> (*) 3
+display(add2times3 5)
 
 #!markdown
 

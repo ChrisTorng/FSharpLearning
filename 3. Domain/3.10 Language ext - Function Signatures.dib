@@ -119,3 +119,21 @@ foreach(var a in listA)
          yield return Process(a, b);
     }
 }
+
+#!csharp
+
+using System.Threading;
+static IEnumerable<DateTime> GetNow()
+{
+    var now = DateTime.Now;
+    Console.WriteLine("GetNow: {0:mm:ss}", now);
+    yield return now;
+}
+
+Console.WriteLine("1: {0:mm:ss}", DateTime.Now);
+var time = from t in GetNow()
+           select t;
+Console.WriteLine("2: {0:mm:ss}", DateTime.Now);
+Thread.Sleep(1000);
+Console.WriteLine("3: {0:mm:ss}", DateTime.Now);
+Console.WriteLine("4: {0:mm:ss}", time.Single());
