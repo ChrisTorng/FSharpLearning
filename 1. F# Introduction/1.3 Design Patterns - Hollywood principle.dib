@@ -41,6 +41,10 @@ let safeDivide = divide ifZero1 ifSuccess1
 safeDivide 6 4
 safeDivide 6 0
 
+#!markdown
+
+See "3.3 ActionFunc.dib" for C# implement
+
 #!csharp
 
 Action<int, int> Divide1(Action ifZero, Action<int> ifSuccess) =>

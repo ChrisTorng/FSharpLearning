@@ -109,5 +109,3 @@ Not adopting `record` now
 
 * No inheritance between `class`
 * Less code only
-
-Waiting for `readonly record struct`

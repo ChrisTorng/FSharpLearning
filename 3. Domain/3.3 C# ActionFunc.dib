@@ -1,3 +1,9 @@
+#!markdown
+
+# C# function as parameter and return value
+
+## Pass `Action<>` as parameter
+
 #!csharp
 
 void SqlExecute1(int value) => value.ToString();
@@ -49,6 +55,10 @@ void TryExecute(Action action)
 TryExecute(() => SqlExecute1(1));
 TryExecute(() => SqlExecute2("1"));
 
+#!markdown
+
+## Pass `Func<>` as parameter
+
 #!csharp
 
 string Query1(int key)
@@ -99,6 +109,8 @@ TryQuery(() => SqlQuery2("1"), 0);
 
 # [Async Disposables The Easy Way](https://haacked.com/archive/2021/12/10/async-disposables/)
 
+## Function for later execution
+
 #!csharp
 
 Console.WriteLine("Working on it...");
@@ -146,6 +158,12 @@ public static class Disposable
     throw new Exception();
     // scope is disposed and Working on it... is printed to console 
 }
+
+#!markdown
+
+# Return function as return value
+
+Extend from "1.3 Design Patterns - Hollywood principle.dib"
 
 #!csharp
 

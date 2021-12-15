@@ -8,6 +8,11 @@
 
 // one-liners
 [1..100] |> List.sum |> printfn "sum=%d"
+// C#:1. var list = Enumerable.Range(1, 100);
+//       var sum = list.Sum();
+//       Console.WriteLine("sum={0}", sum);
+//    2. Console.WriteLine("sum={0}", Enumerable.Sum(Enumerable.Range(1, 100)));
+//    3. Console.WriteLine("sum={0}", Enumerable.Range(1, 100).Sum());
 
 // no curly braces, semicolons or parentheses
 let double x = x + x
